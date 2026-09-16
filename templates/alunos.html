@@ -1,16 +1,12 @@
 {% extends "base.html" %}
 
-
 {% block conteudo %}
 
-
 <h2>Alunos Cadastrados</h2>
-
 
 <p>
     <a href="/alunos/novo">Cadastrar novo aluno</a>
 </p>
-
 
 <table border="1" cellpadding="8">
     <thead>
@@ -22,7 +18,6 @@
             <th>Telefone</th>
         </tr>
     </thead>
-
 
     <tbody>
         {% for aluno in alunos %}
@@ -36,6 +31,5 @@
         {% endfor %}
     </tbody>
 </table>
-
 
 {% endblock %}
