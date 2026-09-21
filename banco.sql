@@ -1,24 +1,4 @@
 CREATE DATABASE biblioteca_1ano;
-USE biblioteca_1ano;
-
-#Criando usuário
-CREATE USER 'biblioteca_user1'@'localhost' IDENTIFIED BY 'projeto1';
-
-#Dar Permissão ao usuário
-GRANT ALL PRIVILEGES
-ON biblioteca_1ano.*
-TO 'biblioteca_user1'@'localhost';
-
-#Atualiza Permissão
-FLUSH PRIVILEGES;
-
-#Visualizar todas as bases existentes
-SHOW DATABASES;
-
-#Visualizar todos os usuários
-SELECT user FROM mysql.user;
-
-#Criação da tabela de Aluno
 CREATE TABLE aluno (
     id_aluno INT AUTO_INCREMENT PRIMARY KEY,
     nome VARCHAR(100) NOT NULL,
@@ -26,8 +6,6 @@ CREATE TABLE aluno (
     turma VARCHAR(20) NOT NULL,
     telefone VARCHAR(20)
 );
-
-#Criação da tabela de Livro
 CREATE TABLE livro (
     id_livro INT AUTO_INCREMENT PRIMARY KEY,
     titulo VARCHAR(150) NOT NULL,
@@ -35,86 +13,90 @@ CREATE TABLE livro (
     categoria VARCHAR(50),
     status VARCHAR(20) NOT NULL DEFAULT 'Disponível'
 );
-
-#Criação da tabela de Professor
 CREATE TABLE professor (
- id_professor INT AUTO_INCREMENT PRIMARY KEY,
+    id_professor INT AUTO_INCREMENT PRIMARY KEY,
     nome VARCHAR(100) NOT NULL,
     telefone VARCHAR(20) NOT NULL,
     email VARCHAR(100) NOT NULL);
-
-#Criação da tabela de Bibliotecário
-CREATE TABLE bibliotecario (
+    CREATE TABLE bibliotecario (
     id_bibliotecario INT AUTO_INCREMENT PRIMARY KEY,
     nome VARCHAR(100) NOT NULL,
     email VARCHAR(100) NOT NULL
 );
-#inset em todas as tabbelas
-#pelo menos 5 INSERt por tabela
+CREATE TABLE emprestimo (
+    id_emprestimo INT AUTO_INCREMENT PRIMARY KEY,
+    id_aluno INT,
+    id_livro INT,
+    id_bibliotecario INT,
+    data_emprestimo DATE NOT NULL,
+    data_prevista_devolucao DATE NOT NULL,
+    data_devolucao DATE,
+    status VARCHAR(20) NOT NULL DEFAULT 'Emprestado',
 
-INSERT INTO aluno (nome, serie, turma, telefone)
-VALUES('ruan','1 ano','1B','4435936-9673'),
-('kaio naves','1 ano','1B','4467694-1423'),
-('daniel assis','1 ano','1B','4459583-2848'),
-('fernando HENRIQUE','1 ano','1B','4467409-2948'),
-('lucas mauro ','1 ano','1B','4427304-2015');
 
-SELECT * FROM ALUNO;
+    FOREIGN KEY (id_aluno) REFERENCES aluno(id_aluno),
+    FOREIGN KEY (id_livro) REFERENCES livro(id_livro),
+    FOREIGN KEY (id_bibliotecario) REFERENCES bibliotecario(id_bibliotecario)
+);
+CREATE TABLE usuario (
 
-INSERT INTO bibliotecario (nome, email)
-VALUES('Ruan','ruan@gmail.com'),
-('pulgar','pulgar@gmail.com'),
-('wallace yan','wallaceyan@gmail.com'),
-('varela','varela@gmail.com'),
-('rossi','rossi@gmail.com');
 
-SELECT * FROM bibliotecario;
+    id_usuario INT AUTO_INCREMENT PRIMARY KEY,
+    nome VARCHAR(100) NOT NULL,
+    email VARCHAR(100) NOT NULL UNIQUE,
+    senha VARCHAR(100) NOT NULL,
+    perfil VARCHAR(30) NOT NULL,
+    status VARCHAR(20) NOT NULL DEFAULT 'Ativo',
+    id_aluno INT NOT NULL,
+    id_professor INT NOT NULL,
+    id_bibliotecario INT NOT NULL,
+    FOREIGN KEY (id_aluno) REFERENCES aluno(id_aluno),
+    FOREIGN KEY (id_professor ) REFERENCES professor(id_professor ),
+    FOREIGN KEY (id_bibliotecario) REFERENCES bibliotecario(id_bibliotecario)
+);
+INSERT INTO aluno(nome, serie, turma, telefone) 
+VALUES("Murilo", "1 ANO", '1B', '4002-8922'),
+('Sâmela', '1 ANO', '1B', '9293-9900'),
+('Lucas', '1 ANO', '1B', '8880-4499'),
+('Júlia', '1 ANO', '1B', '9939-4000'),
+('Beatriz', '1 ANO', '1B', 9915-6110);
 
-INSERT INTO livro (titulo, autor, categoria, status)
-VAlUES(' A volta ao mundo em 80 dias','julio verne','ficção cientifica','0'),
-('A viagem ao centro da terra','julioi verne','suspense','1'),
-('A terra longa','julio verne','comédia','2'),
-('A guerra longa','julio verne','românce','3'),
-('Da terra a lua','julio verne','fantasia','4');
+INSERT INTO bibliotecario(nome, email)
+VALUES('Cláudia','ClaudiaCEMAP@escola.pr.gov.br'),
+('Jéssica','Jessicabiblioteca@escola.pr.gov.br'),
+('Ruan','RuanFazTudo@escola.pr.gov.br'),
+('Lígia','Lígia@escola.pr.gov.br'),
+('Cleres','Cleres_Mansano@escola.pr.gov.br');
 
-SELECT * FROM livro;
--- 1. Inserindo dados e consultando a tabela 'professor'
-INSERT INTO professor (nome, telefone, email)
-VALUES 
-    ('ruan', '4492567-9367', 'ruan@gmail.com'),
-    ('neriudo', '4492875-3679', 'neriudo@gmail.com'),
-    ('jorge', '4492637-9257', 'jorge@gmail.com'),
-    ('neymar', '4492767-9286', 'neymar@gmail.com'),
-    ('douglas', '4492725-2887', 'douglas@gmail.com');
+
+INSERT INTO livro(titulo, autor, categoria, status)
+VALUES('Percy Jackson E O Ladrão de Raios','Rick Riordan','fantasia juvenil','Dísponivel'),
+('Percy Jackson E O Mar de Monstros', 'Rick Riordan', 'fantasia juvenil', 'Emprestado'),
+('Percy Jackson A Maldição do Titã','Rick Riordan','fantasia juvenil','Em Atraso'),
+('Pavores da Fazbear Mergulho na escuridão','Scott Cawthon','terror','Dísponivel'),
+('Pavores da Fazbear 4:35AM', 'Scott Cawthon', 'terror', 'Emprestado');
+
+INSERT INTO professor(nome, telefone, email)
+VALUES('Cláudia','9924-5464','ClaudiaCEMAP@escola.pr.gov.br'),
+('Rodrigo', '7754-6575', 'Rodrigo.Dias@escola.pr.gov.br'),
+('Nayara','9430-6423','Nay.Oliveira@gmail.com'),
+('Ronaldo','4325-4323','Ronaldo@escola.pr.gov.br'),
+('Tyago', '4354-5464', 'Tyago@escola.pr.gov.br');
 
 SELECT * FROM professor;
 
--- 2. Inserindo dados e consultando a tabela 'livro'
-INSERT INTO livro (titulo, autor, categoria, status)
-VALUES
-    ('A volta ao mundo em 80 dias', 'Julio Verne', 'Ficção científica', '0'),
-    ('Viagem ao centro da terra', 'Julio Verne', 'Suspense', '1'),
-    ('A terra longa', 'Julio Verne', 'Comédia', '2'),
-    ('A guerra longa', 'Julio Verne', 'Romance', '3'),
-    ('Da terra a lua', 'Julio Verne', 'Fantasia', '4');
 
-SELECT * FROM emprestimo;
-CREATE DATABASE biblioteca_1ano;
-USE biblioteca_1ano;
+INSERT INTO usuario (nome, email, senha, perfil, status, id_aluno, id_professor, id_bibliotecario)
+VALUES 
+('Cláudia', 'ClaudiaCEMAP@escola.pr.gov.br', 'Clausoft', 'Professor', 'Ativo', 1, 1, 1),
+('Rodrigo', 'Rodrigo.Dias@escola.pr.gov.br', 'DRigo23', 'Professor', 'Ativo', 1, 2, 1),
+('Nayara', 'Nay.Oliveira@gmail.com', 'Nay124', 'Professor', 'Ativo', 1, 3, 1),
+('Ronaldo', 'Ronaldo@escola.pr.gov.br', 'ROnaldo', 'Professor', 'Ativo', 1, 4, 1),
+('Tyago', 'Tyago@escola.pr.gov.br', 'YTago', 'Professor', 'Ativo', 1, 5, 1);
 
-#Criando usuário
-CREATE USER 'biblioteca_user1'@'localhost' IDENTIFIED BY 'projeto1';
-
-#Dar Permissão ao usuário
-GRANT ALL PRIVILEGES
-ON biblioteca_1ano.*
-TO 'biblioteca_user1'@'localhost';
-
-#Atualiza Permissão
-FLUSH PRIVILEGES;
-
-#Visualizar todas as bases existentes
-SHOW DATABASES;
-
-#Visualizar todos os usuários
-SELECT user FROM mysql.user;
+INSERT INTO emprestimo (id_aluno, id_livro, id_bibliotecario, data_emprestimo, data_prevista_devolucao, data_devolucao, status)
+VALUES ('1','2', '3', '2026-07-09', '2026-08-09', '2026-08-09', 'devolvido'),
+('2','1','3', '2026-08-07', '2026-09-07', '2026-09-03', 'devolvido'),
+('3','4', '3', '2026-07-09', '2026-08-09', '2026-08-09', 'devolvido'),
+('4','5', '2', '2026-07-07', '2026-08-07', '2026-08-09', 'devolvido atrasado'),
+('1','2', '3', '2026-07-07', '2026-08-08', '2026-08-08', 'devolvido');
