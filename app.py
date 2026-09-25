@@ -1,10 +1,10 @@
-from flask import Flask, render_template, request, redirect
+from flask import Flask, render_template, request, redirect, flash
 import mysql.connector
 from config import DB_CONFIG
 
 
 app = Flask(__name__)
-
+app.secret_key = "biblioteca_escolar"
 
 def conectar():
     return mysql.connector.connect(**DB_CONFIG)
