@@ -16,7 +16,50 @@ def conectar():
 
 @app.route("/")
 def index():
-    return render_template("index.html")
+    try:
+        conexao = conectar()
+        cursor = conexao.cursor(dictionary=True)
+
+
+        cursor.execute("SELECT COUNT(*) AS total FROM aluno")
+        total_alunos = cursor.fetchone()["total"]
+
+
+        cursor.execute("SELECT COUNT(*) AS total FROM livro")
+        total_livros = cursor.fetchone()["total"]
+
+
+        cursor.execute("SELECT COUNT(*) AS total FROM livro WHERE status = 'Disponível'")
+        total_disponiveis = cursor.fetchone()["total"]
+
+
+        cursor.execute("SELECT COUNT(*) AS total FROM emprestimo WHERE status = 'Emprestado'")
+        total_emprestimos = cursor.fetchone()["total"]
+
+
+        cursor.close()
+        conexao.close()
+
+
+        return render_template(
+            "index.html",
+            total_alunos=total_alunos,
+            total_livros=total_livros,
+            total_disponiveis=total_disponiveis,
+            total_emprestimos=total_emprestimos
+        )
+
+
+    except Exception as erro:
+        flash(f"Erro ao carregar página inicial: {erro}", "erro")
+        return render_template(
+            "index.html",
+            total_alunos=0,
+            total_livros=0,
+            total_disponiveis=0,
+            total_emprestimos=0
+        )
+
 
 
 @app.route("/alunos")
@@ -221,6 +264,9 @@ def cadastrar_bibliotecario():
 @app.route("/emprestimos")
 def listar_emprestimos():
     try:
+        status = request.args.get("status", "")
+
+
         conexao = conectar()
         cursor = conexao.cursor(dictionary=True)
 
@@ -239,11 +285,17 @@ def listar_emprestimos():
             INNER JOIN aluno a ON e.id_aluno = a.id_aluno
             INNER JOIN livro l ON e.id_livro = l.id_livro
             INNER JOIN bibliotecario b ON e.id_bibliotecario = b.id_bibliotecario
-            ORDER BY e.id_emprestimo DESC
         """
 
 
-        cursor.execute(sql)
+        if status:
+            sql += " WHERE e.status = %s ORDER BY e.id_emprestimo DESC"
+            cursor.execute(sql, (status,))
+        else:
+            sql += " ORDER BY e.id_emprestimo DESC"
+            cursor.execute(sql)
+
+
         emprestimos = cursor.fetchall()
 
 
@@ -251,13 +303,16 @@ def listar_emprestimos():
         conexao.close()
 
 
-        return render_template("emprestimos.html", emprestimos=emprestimos)
+        return render_template(
+            "emprestimos.html",
+            emprestimos=emprestimos,
+            status=status
+        )
 
 
     except Exception as erro:
-        return f"Erro ao listar empréstimos: {erro}"
-
-
+        flash(f"Erro ao listar empréstimos: {erro}", "erro")
+        return redirect("/")
 
 
 @app.route("/emprestimos/novo")
@@ -750,6 +805,52 @@ def excluir_bibliotecario(id_bibliotecario):
 
    
     return redirect("/bibliotecarios")
+
+# Rota Empréstimos atrasados
+@app.route("/emprestimos/atrasados")
+def listar_emprestimos_atrasados():
+    try:
+        conexao = conectar()
+        cursor = conexao.cursor(dictionary=True)
+
+
+        sql = """
+            SELECT
+                e.id_emprestimo,
+                a.nome AS aluno,
+                l.titulo AS livro,
+                b.nome AS bibliotecario,
+                e.data_emprestimo,
+                e.data_prevista_devolucao,
+                DATEDIFF(CURDATE(), e.data_prevista_devolucao) AS dias_atraso,
+                e.status
+            FROM emprestimo e
+            INNER JOIN aluno a ON e.id_aluno = a.id_aluno
+            INNER JOIN livro l ON e.id_livro = l.id_livro
+            INNER JOIN bibliotecario b ON e.id_bibliotecario = b.id_bibliotecario
+            WHERE e.status = 'Emprestado'
+              AND e.data_prevista_devolucao < CURDATE()
+            ORDER BY e.data_prevista_devolucao
+        """
+
+
+        cursor.execute(sql)
+        emprestimos = cursor.fetchall()
+
+
+        cursor.close()
+        conexao.close()
+
+
+        return render_template(
+            "emprestimos_atrasados.html",
+            emprestimos=emprestimos
+        )
+
+
+    except Exception as erro:
+        flash(f"Erro ao listar empréstimos atrasados: {erro}", "erro")
+        return redirect("/emprestimos")
 
 if __name__ == "__main__":
     app.run(debug=True)

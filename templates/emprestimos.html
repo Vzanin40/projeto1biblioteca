@@ -81,3 +81,34 @@
 
 
 {% endblock %}
+<form method="GET" action="/emprestimos">
+
+
+    <label>Filtrar por status:</label>
+
+
+    <select name="status">
+        <option value="">Todos</option>
+
+
+        <option value="Emprestado" {% if status == 'Emprestado' %}selected{% endif %}>
+            Emprestado
+        </option>
+
+
+        <option value="Devolvido" {% if status == 'Devolvido' %}selected{% endif %}>
+            Devolvido
+        </option>
+    </select>
+
+
+    <button type="submit">Filtrar</button>
+
+
+    <a href="/emprestimos">Limpar</a>
+
+
+</form>
+
+
+<br>
