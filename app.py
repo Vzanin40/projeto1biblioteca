@@ -315,6 +315,7 @@ def listar_emprestimos():
         return redirect("/")
 
 
+
 @app.route("/emprestimos/novo")
 def formulario_emprestimo():
     try:
